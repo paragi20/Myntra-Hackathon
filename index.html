@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Image Generator</title>
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="icon" href="myntra.png" type="image/x-icon">
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="Logo.png" alt="Logo" />
+            </div>
+            <div class="nav-links">
+                <a href="#">MEN</a>
+                <a href="#">WOMEN</a>
+                <a href="#">KIDS</a>
+                <a href="#">HOME & LIVING</a>
+                <a href="#">BEAUTY</a>
+                <a href="#">STUDIO</a>
+                <img src="KalaKotureLogo.jpg" alt="logo" />
+            </div>
+            <div class="search-container">
+                <input
+                    type="text"
+                    placeholder="Search for products, brands and more"
+                />
+                <button type="submit">
+                    <img
+                        src="https://www.freeiconspng.com/uploads/search-icon-png-21.png"
+                        alt="Search"
+                    />
+                </button>
+            </div>
+            <div class="profile-options">
+                <a href="#">Profile</a>
+                <a href="#">Wishlist</a>
+                <a href="#">Bag</a>
+            </div>
+        </nav>
+
+        <div class="content">
+            <h1 class="funky-heading">
+                <span class="orange">K</span>ALA
+                <span class="orange">K</span>OTURE
+            </h1>
+            <p>Get your ideas through AI generated designs</p>
+            <input
+                type="text"
+                id="promptInput"
+                placeholder="Enter your prompt here"
+            />
+            <button onclick="sendPrompt()">Send Prompt</button>
+            <img class="responseImage" id="responseContainer" />
+
+            <div id="spinner" class="loader"></div>
+        </div>
+
+        <script>
+            const apiKey =
+                "Enter-your-API-Key";
+
+            function showSpinner() {
+                document.getElementById("spinner").style.display = "flex";
+            }
+
+            function hideSpinner() {
+                document.getElementById("spinner").style.display = "none";
+            }
+
+            function sendPrompt() {
+                if (!apiKey) {
+                    console.error("API key is not set");
+                    return;
+                }
+                //  else {
+                //     console.log(apiKey);
+                // }
+
+                const prompt = document.getElementById("promptInput").value;
+
+                document.getElementById("responseContainer").style.display =
+                    "none";
+
+                showSpinner();
+
+                const options = {
+                    method: "POST",
+                    headers: {
+                        accept: "application/json",
+                        "content-type": "application/json",
+                        authorization: `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model: "stable-diffusion-xl-v1-0",
+                        prompt: `${prompt}`,
+                        negative_prompt: "Disfigured, cartoon, blurry",
+                        prompt_2: `${prompt}`,
+                        negative_prompt_2: "Disfigured, cartoon, blurry",
+                        width: 768,
+                        height: 1024,
+                        steps: 30,
+                        guidance: 7.5,
+                        seed: 0,
+                        scheduler: "euler",
+                        output_format: "jpeg",
+                        response_format: "b64",
+                    }),
+                };
+
+                fetch(
+                    "https://api.getimg.ai/v1/stable-diffusion-xl/text-to-image",
+                    options
+                )
+                    .then((response) => response.json())
+                    .then((response) => {
+                        const base64Image = `data:image/png;base64,${response["image"]}`;
+                        const image =
+                            document.getElementById("responseContainer");
+                        image.style.display = "flex";
+                        hideSpinner();
+                        image.src = base64Image;
+                        image.alt = prompt;
+                    })
+                    .catch((err) => console.error(err));
+            }
+        </script>
+    </body>
+</html>
